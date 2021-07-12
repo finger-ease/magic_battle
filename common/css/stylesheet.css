@@ -1,0 +1,54 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+.header {
+  padding: 8px 20px;
+  border-bottom: 1px solid #999;
+}
+
+.content_wrapper {
+  margin: 20px 40px 0;
+}
+
+#characterWrapper {
+  display: flex;
+  margin: 0 auto;
+}
+
+.character_container {
+  width: calc(100% / 4);
+}
+
+.status_list {
+  margin-top: 16px;
+}
+
+.status_item {
+  display: flex;
+}
+
+.status_item + .status_item {
+  margin-top: 8px;
+}
+
+.status_title {
+  width: 50px;
+  color: #bf0000;
+}
+
+#battleHistory {
+  width: 100%;
+  margin-top: 20px;
+}
+
+#startButton {
+  display: block;
+  margin: 0 auto;
+  padding: 4px;
+}

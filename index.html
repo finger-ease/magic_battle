@@ -8,17 +8,15 @@
   <link rel="stylesheet" href="/common/css/stylesheet.css">
 </head>
 <body>
-  <header></header>
-  <main>
-    <section>
-      <h1 class="">Magic Battle</h1>
-      <div>
-        <input type="text" id="characterA" value="a">
-        <input type="text" id="characterB" value="a">
-        <textarea name="" id="" cols="30" rows="10" readonly></textarea>
-        <button type="button" id="startButton">Battle Start</button>
-      </div>
-    </section>
+  <header class="header">
+    <h1 class="">Magic Battle</h1>
+  </header>
+  <main class="content_wrapper">
+    <div>
+      <div id="characterWrapper"></div>
+      <textarea name="" id="battleHistory" cols="30" rows="10" readonly></textarea>
+      <button type="button" id="startButton">Battle Start</button>
+    </div>
   </main>
   <footer></footer>
   <script src="/common/js/script.js"></script>
