@@ -8,14 +8,18 @@
   <link rel="stylesheet" href="/common/css/stylesheet.css">
 </head>
 <body>
-  <header class="header">
+  <header>
     <h1 class="">Magic Battle</h1>
   </header>
   <main class="content_wrapper">
     <div>
-      <div id="characterWrapper"></div>
+      <div id="actorWrapper"></div>
       <textarea name="" id="battleHistory" cols="30" rows="10" readonly></textarea>
-      <button type="button" id="startButton">Battle Start</button>
+      <div class="button_container">
+        <button type="button" id="setButton">Set</button>
+        <button type="button" id="startButton">Battle Start</button>
+        <button type="reset" id="resetButton">Reset</button>
+      </div>
     </div>
   </main>
   <footer></footer>

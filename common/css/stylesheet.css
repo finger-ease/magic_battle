@@ -7,21 +7,25 @@ ul {
   list-style: none;
 }
 
-.header {
+header {
   padding: 8px 20px;
   border-bottom: 1px solid #999;
+}
+
+button {
+  padding: 4px;
 }
 
 .content_wrapper {
   margin: 20px 40px 0;
 }
 
-#characterWrapper {
+#actorWrapper {
   display: flex;
   margin: 0 auto;
 }
 
-.character_container {
+.actor_container {
   width: calc(100% / 4);
 }
 
@@ -47,8 +51,15 @@ ul {
   margin-top: 20px;
 }
 
-#startButton {
-  display: block;
-  margin: 0 auto;
-  padding: 4px;
+.button_container {
+  display: flex;
+  justify-content: center;
+}
+
+#startButton, #resetButton {
+  display: none;
+}
+
+#resetButton {
+  margin-left: 12px;
 }
