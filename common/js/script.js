@@ -18,7 +18,7 @@ class Actor {
     actor.name = actor_name;
     const name_hash = await hash(actor_name);
 
-    statuses.forEach((status, index) => actor[status] = parseInt(name_hash.slice(index * 8, index * 8 + 7), 16) % 100);
+    statuses.forEach((status, index) => actor[status] = parseInt(name_hash.slice(index * 8, index * 8 + 7), 16) % 100 + 1);
     return actor;
   }
 
@@ -32,24 +32,32 @@ class Actor {
       return false;
     } else if (rand_hit > 90) {
       addHistory('かいしん の いちげき！');
-      return Math.round(this.str * rand_pow * 1.5);
+      return [Math.round(this.str * rand_pow * 1.5), this.agi];
     } else {
-      return Math.round(this.str * rand_pow);
+      return [Math.round(this.str * rand_pow), this.agi];
     }
   }
 
-  defend(pow, index) {
-    let damage = pow - this.def;
+  defend(atk, index) {
+    let damage = atk[0] - this.def;
+    let avoidance = this.agi - atk[1];
+    const rand_hit = Math.round(Math.random() * 100);
+
     if (damage <= 0) damage = 1;
-    addHistory(`${this.name} は ${damage} の ダメージをうけた！`);
-    this.hp -= damage;
+    if (avoidance < 0) avoidance = 0;
+    if (rand_hit > avoidance) {
+      addHistory(`${this.name} は ${damage} の ダメージをうけた！`);
+      this.hp -= damage;
 
-    if (this.hp < 0) {
-      this.hp = 0;
-      addHistory(`\n${this.name} は ちからつきた！`);
+      if (this.hp < 0) {
+        this.hp = 0;
+        addHistory(`\n${this.name} は ちからつきた！`);
+      }
+
+      document.getElementById(`actor${index}_hp`).textContent = this.hp;
+    } else {
+      addHistory(`${this.name} は こうげき を かわした！`)
     }
-
-    document.getElementById(`actor${index}_hp`).textContent = this.hp;
   }
 }
 
@@ -106,14 +114,14 @@ window.onload = function () {
   $startButton.addEventListener('click', () => {
     while (sorted_actors.length > 1) {
       for (let i = 0; i < sorted_actors.length; i++) {
-        const pow = sorted_actors[i].attack();
-        if (pow) {
+        const atk = sorted_actors[i].attack();
+        if (atk) {
           const arr = sorted_actors.filter(n => n !== sorted_actors[i]);
           const targeted = arr[Math.floor(Math.random() * arr.length)];
           let targeted_index;
 
           actors.forEach((actor, index) => { if (actor.name === targeted.name) targeted_index = index });
-          targeted.defend(pow, targeted_index);
+          targeted.defend(atk, targeted_index);
 
           if (targeted.hp === 0) {
             sorted_actors = sorted_actors.filter(n => n !== targeted);
