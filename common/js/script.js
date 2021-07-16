@@ -37,6 +37,7 @@ window.onload = function () {
   const $startButton = document.getElementById('startButton');
   const $resetButton = document.getElementById('resetButton');
   let sorted_actors = [];
+  let remain_actors = [];
 
   for (let i = 0; i < actor_num; i++) document.getElementById('actorWrapper').innerHTML += actorHTML(i);
 
@@ -62,25 +63,24 @@ window.onload = function () {
     $startButton.style.display = 'none';
     $resetButton.style.pointerEvents = 'none';
 
-    while (sorted_actors.length > 1) {
+    while (remain_actors.length !== 1) {
       for (let i = 0; i < sorted_actors.length; i++) {
+        if (sorted_actors[i].down) continue;
         const atk = await sorted_actors[i].action();
+
         if (atk) {
-          const arr = sorted_actors.filter(n => n !== sorted_actors[i]);
+          const arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && !sorted_actor.down);
           const targeted = arr[Math.floor(Math.random() * arr.length)];
           let targeted_index;
 
           actors.forEach((actor, index) => { if (actor.name === targeted.name) targeted_index = index });
           await targeted.defend(atk, targeted_index);
 
-          if (targeted.hp === 0) {
-            sorted_actors = sorted_actors.filter(n => n !== targeted);
-            if (i >= targeted.num) i--;
-            if (sorted_actors.length === 1) break;
-          }
+          if (targeted.hp === 0) targeted.down = true;
         }
         await output('', false, 0);
       }
+      remain_actors = sorted_actors.filter(sorted_actor => !sorted_actor.down);
     }
 
     await output(`\n${sorted_actors[0].name} の しょうり！`, 'finish');

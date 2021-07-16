@@ -32,6 +32,7 @@ export class Actor {
     statuses.forEach((status, index) => actor[status] = parseInt(name_hash.slice(index * 4, index * 4 + 3), 16) % 100 + 1);
     actor.elemNum = actor.elem % elems.length
     actor.elem = elems[actor.elemNum];
+    actor.down = false;
     actor.magic = magic[magicNum];
     actor.num = actorCount++;
     return actor;
@@ -66,7 +67,7 @@ export class Actor {
       }
     } else {
       if (this.mp < this.magic.cost) {
-        await output(`${this.name} は ${this.magic.name} の えいしょう に しっぱいした！`, 'miss');
+        await output(`${this.name} は ${this.magic.name} の えいしょう に しっぱいした！`, 'fail');
       } else {
         await output(`${this.name} は ${this.magic.name} を となえた！`, this.magic.name);
         this.mp -= this.magic.cost;
