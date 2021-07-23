@@ -119,7 +119,7 @@ const job = [
   {
     name: '魔術師',
     magnifications: [0.9, 1.1, 0.9, 0.9, 1.1, 1.1, 1.0, 1.0],
-    tendencies: [0.8, 1,2, 1.0]
+    tendencies: [0.8, 1.2, 1.0]
   },
   {
     name: '盗賊',
