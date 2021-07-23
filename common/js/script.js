@@ -1,7 +1,7 @@
 import { output } from './output.js';
 import { statuses, Actor } from './actor.js';
 
-const actor_num = 4;
+const actor_num = 8;
 let actors = [];
 
 const actorHTML = (num) => {
@@ -12,8 +12,18 @@ const actorHTML = (num) => {
         <p class="status_title">${status.toUpperCase()}</p>
         <span id="actor${num}_${status}"></span>
       </li>
-    `
+    `;
   });
+  status_list += `
+    <li class="status_item">
+      <p class="status_title">魔法</p>
+      <span id="actor${num}_mag"></span>
+    </li>
+    <li class="status_item">
+      <p class="status_title">職業</p>
+      <span id="actor${num}_job"></span>
+    </li>
+  `;
   return `
     <div class="actor_container">
       <input type="text" id="actor${num}" value="${num}">
@@ -21,15 +31,18 @@ const actorHTML = (num) => {
         ${status_list}
       </ul>
     </div>
-  `
-}
+  `;
+};
 
 const set_status = (actor, index) => {
   statuses.forEach(status => document.getElementById(`actor${index}_${status}`).textContent = actor[status]);
+  document.getElementById(`actor${index}_mag`).textContent = actor.magic.name;
+  document.getElementById(`actor${index}_job`).textContent = actor.job.name;
 }
 
 const clear_status = index => {
   statuses.forEach(status => document.getElementById(`actor${index}_${status}`).textContent = '');
+  document.getElementById(`actor${index}_mag`).textContent = '';
 }
 
 window.onload = function () {
@@ -37,11 +50,12 @@ window.onload = function () {
   const $startButton = document.getElementById('startButton');
   const $resetButton = document.getElementById('resetButton');
   let sorted_actors = [];
-  let remain_actors = [];
 
   for (let i = 0; i < actor_num; i++) document.getElementById('actorWrapper').innerHTML += actorHTML(i);
 
   $setButton.addEventListener('click', async () => {
+    Actor.resetNum();
+
     for (let i = 0; i < actor_num; i++) {
       const actor_name = document.getElementById(`actor${i}`).value;
       actors.push(await Actor.init(actor_name)); //アクターを生成して配列にプッシュ
@@ -60,6 +74,7 @@ window.onload = function () {
   });
 
   $startButton.addEventListener('click', async () => {
+    let remain_actors = [];
     $startButton.style.display = 'none';
     $resetButton.style.pointerEvents = 'none';
 
@@ -83,7 +98,9 @@ window.onload = function () {
       remain_actors = sorted_actors.filter(sorted_actor => !sorted_actor.down);
     }
 
-    await output(`\n${sorted_actors[0].name} の しょうり！`, 'finish');
+    remain_actors = sorted_actors.filter((sorted_actor) => !sorted_actor.down);
+
+    await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
 
     $resetButton.style.pointerEvents = 'auto';
   });
@@ -97,4 +114,4 @@ window.onload = function () {
     $resetButton.style.display = 'none';
     $setButton.style.display = 'block';
   });
-}
+};
