@@ -1,7 +1,7 @@
 import { output } from './output.js';
 import { statuses, Actor } from './actor.js';
 
-const actor_num = 8;
+const actor_num = 4;
 let actors = [];
 
 const actorHTML = (num) => {
@@ -43,6 +43,7 @@ const set_status = (actor, index) => {
 const clear_status = index => {
   statuses.forEach(status => document.getElementById(`actor${index}_${status}`).textContent = '');
   document.getElementById(`actor${index}_mag`).textContent = '';
+  document.getElementById(`actor${index}_job`).textContent = '';
 }
 
 window.onload = function () {
@@ -75,10 +76,11 @@ window.onload = function () {
 
   $startButton.addEventListener('click', async () => {
     let remain_actors = [];
+    let elapsed_turn = 0;
     $startButton.style.display = 'none';
     $resetButton.style.pointerEvents = 'none';
 
-    while (remain_actors.length !== 1) {
+    while (remain_actors.length !== 1 && elapsed_turn <= 50) {
       for (let i = 0; i < sorted_actors.length; i++) {
         if (sorted_actors[i].down) continue;
         const atk = await sorted_actors[i].action();
@@ -95,12 +97,17 @@ window.onload = function () {
         }
         await output('', false, 0);
       }
+      elapsed_turn += 1;
       remain_actors = sorted_actors.filter(sorted_actor => !sorted_actor.down);
     }
 
     remain_actors = sorted_actors.filter((sorted_actor) => !sorted_actor.down);
 
-    await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
+    if (remain_actors.length === 1) {
+      await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
+    } else {
+      await output(`ひきわけ`);
+    }
 
     $resetButton.style.pointerEvents = 'auto';
   });
