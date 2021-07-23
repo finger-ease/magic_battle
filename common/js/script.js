@@ -1,7 +1,6 @@
 import { output } from './output.js';
 import { statuses, Actor } from './actor.js';
 
-const actor_num = 4;
 let actors = [];
 
 const actorHTML = (num) => {
@@ -47,15 +46,24 @@ const clear_status = index => {
 }
 
 window.onload = function () {
+  const $entryWrapper = document.getElementById('entryWrapper');
+  const $confirmButton = document.getElementById('confirmButton');
   const $setButton = document.getElementById('setButton');
   const $startButton = document.getElementById('startButton');
   const $resetButton = document.getElementById('resetButton');
   let sorted_actors = [];
 
-  for (let i = 0; i < actor_num; i++) document.getElementById('actorWrapper').innerHTML += actorHTML(i);
+  $confirmButton.addEventListener('click', () => {
+    const actor_num = document.getElementById('entryNum').value;
+    if (actor_num >= 2) {
+      for (let i = 0; i < actor_num; i++) document.getElementById('actorWrapper').innerHTML += actorHTML(i);
+      $entryWrapper.style.display = 'none'
+    }
+  });
 
   $setButton.addEventListener('click', async () => {
     Actor.resetNum();
+    const actor_num = document.getElementById('entryNum').value;
 
     for (let i = 0; i < actor_num; i++) {
       const actor_name = document.getElementById(`actor${i}`).value;
@@ -116,9 +124,11 @@ window.onload = function () {
     for (let i = 0; i < actors.length; i++) clear_status(i);
     actors = [];
 
+    document.getElementById('actorWrapper').innerHTML = '';
     document.getElementById('battleHistory').textContent = '';
     $startButton.style.display = 'none';
     $resetButton.style.display = 'none';
+    $entryWrapper.style.display = 'block';
     $setButton.style.display = 'block';
   });
 };
