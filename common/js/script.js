@@ -124,11 +124,9 @@ window.onload = function () {
     for (let i = 0; i < actors.length; i++) clear_status(i);
     actors = [];
 
-    document.getElementById('actorWrapper').innerHTML = '';
     document.getElementById('battleHistory').textContent = '';
     $startButton.style.display = 'none';
     $resetButton.style.display = 'none';
-    $entryWrapper.style.display = 'block';
     $setButton.style.display = 'block';
   });
 };
