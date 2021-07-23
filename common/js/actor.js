@@ -134,7 +134,7 @@ const job = [
   {
     name: '賢者',
     magnifications: [0.8, 1.2, 0.8, 0.8, 1.2, 1.2, 1.0, 1.0],
-    tendencies: [0.7, 1,3, 1.1]
+    tendencies: [0.7, 1.3, 1.1]
   },
   {
     name: '忍者',
