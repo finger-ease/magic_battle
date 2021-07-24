@@ -9,7 +9,9 @@ ul {
 
 header {
   display: flex;
-  padding: 8px 20px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 8px 0;
   border-bottom: 1px solid #999;
 }
 
@@ -149,6 +151,11 @@ button {
 }
 
 @media screen and (max-width: 768px) {
+  header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .content_wrapper {
     padding-left: 16px;
     padding-right: 16px;

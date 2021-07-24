@@ -26,6 +26,10 @@ const actorHTML = (num) => {
       <p class="status_title">魔法2</p>
       <span id="actor${num}_mag2"></span>
     </li>
+    <li class="status_item">
+      <p class="status_title">状態</p>
+      <span id="actor${num}_cond"></span>
+    </li>
   `;
   return `
     <div class="actor_container">
@@ -39,8 +43,9 @@ const actorHTML = (num) => {
 
 const set_status = (actor, i) => {
   statuses.forEach(status => document.getElementById(`actor${i}_${status}`).textContent = actor[status]);
-  actor.magic.forEach((magic, j) => document.getElementById(`actor${i}_mag${j + 1}`).textContent = magic.name);
   document.getElementById(`actor${i}_job`).textContent = actor.job.name;
+  actor.magic.forEach((magic, j) => document.getElementById(`actor${i}_mag${j + 1}`).textContent = magic.name);
+  document.getElementById(`actor${i}_cond`).textContent = '健康';
 }
 
 const clear_status = i => {
@@ -48,6 +53,7 @@ const clear_status = i => {
   document.getElementById(`actor${i}_mag1`).textContent = '';
   document.getElementById(`actor${i}_mag2`).textContent = '';
   document.getElementById(`actor${i}_job`).textContent = '';
+  document.getElementById(`actor${i}_cond`).textContent = '';
 }
 
 window.onload = function () {
@@ -102,45 +108,61 @@ window.onload = function () {
   });
 
   $startButton.addEventListener('click', async () => {
-    let remain_actors = [];
+    let remain_actors = actors.slice();
     let elapsed_turn = 0;
     $startButton.style.display = 'none';
     $resetButton.style.pointerEvents = 'none';
     $battleHistory.style.display = 'block';
 
-    while (remain_actors.length !== 1 && elapsed_turn <= 50) {
+    while (remain_actors.length > 1 && elapsed_turn <= 50) {
       for (let i = 0; i < sorted_actors.length; i++) {
-        if (sorted_actors[i].down) continue;
-        $actorContainers[sorted_actors[i].num].classList.add('-active');
-        const atk = await sorted_actors[i].action();
+        let arr = [];
 
-        if (atk) {
-          const arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && !sorted_actor.down); //攻撃対象の配列を作成
-          const targeted = arr[Math.floor(Math.random() * arr.length)];
-          let targeted_index;
+        switch (sorted_actors[i].cond) {
+          case 'down':
+            break;
+          case 'sleep':
+            await sorted_actors[i].condCheck(sorted_actors[i].cond);
+            break;
+          case 'confuse':
+            await sorted_actors[i].condCheck(sorted_actors[i].cond);
 
-          actors.forEach((actor, index) => { if (actor.name === targeted.name) targeted_index = index });
-          await targeted.defend(atk, targeted_index);
-
-          if (targeted.hp === 0) {
-            targeted.down = true;
-            $actorContainers[targeted.num].classList.add('-down');
-          }
+            if (sorted_actors[i].cond === 'fine') {
+              arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && sorted_actor.cond !== 'down'); //攻撃対象の配列を作成
+            } else {
+              arr = sorted_actors.filter(sorted_actor => sorted_actor === sorted_actors[i]);
+            }
+            break;
+          case 'poison':
+            await sorted_actors[i].condCheck(sorted_actors[i].cond);
+            if (sorted_actors[i].cond === 'down') break;
+          default:
+            arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && sorted_actor.cond !== 'down'); //攻撃対象の配列を作成
         }
-        $actorContainers[sorted_actors[i].num].classList.remove('-active');
-        await output('', false, 0);
+
+        if (arr.length > 0) {
+          $actorContainers[sorted_actors[i].num].classList.add('-active');
+          const atk = await sorted_actors[i].action();
+
+          if (atk) {
+            const targeted = arr[Math.floor(Math.random() * arr.length)];
+            await targeted.defend(atk);
+          }
+          $actorContainers[sorted_actors[i].num].classList.remove('-active');
+          await output('', false, 0);
+        }
       }
       elapsed_turn += 1;
-      remain_actors = sorted_actors.filter(sorted_actor => !sorted_actor.down);
+      remain_actors = sorted_actors.filter(sorted_actor => sorted_actor.cond !== 'down');
     }
 
-    remain_actors = sorted_actors.filter((sorted_actor) => !sorted_actor.down);
+    remain_actors = sorted_actors.filter((sorted_actor) => sorted_actor.cond !== 'down');
 
     if (remain_actors.length === 1) {
       $actorContainers[remain_actors[0].num].classList.add('-active');
       await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
     } else {
-      await output(`50ターンけいか ひきわけ`);
+      await output(`ひきわけ`);
     }
 
     $resetButton.style.pointerEvents = 'auto';
