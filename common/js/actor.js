@@ -108,6 +108,24 @@ const magic = [
     cost: 20,
     pow: 1.5,
     type: 'recovery'
+  },
+  {
+    name: 'スリープ',
+    cost: 15,
+    type: 'effect',
+    cond: 'sleep'
+  },
+  {
+    name: 'ポイズン',
+    cost: 10,
+    type: 'effect',
+    cond: 'poison'
+  },
+  {
+    name: 'コンフューズ',
+    cost: 20,
+    type: 'effect',
+    cond: 'confuse'
   }
 ];
 const job = [
@@ -157,10 +175,12 @@ export class Actor {
     actor.maxHp = actor.hp;
     actor.elemNum = actor.elem % elems.length
     actor.elem = elems[actor.elemNum];
+    actor.cond = 'fine';
     actor.down = false;
     actor.magic = [];
     magicNums.forEach(magicNum => actor.magic.push(magic[magicNum]));
     actor.magic = [...new Set(actor.magic)]; //重複する魔法を削除
+    actor.condAccum = 0;
     actor.num = actorCount++;
     return actor;
   }
@@ -220,7 +240,7 @@ export class Actor {
           switch (selected_magic.type) {
             case 'attack':
               return {
-                type: 'magic',
+                type: 'magic_attack',
                 pow: Math.round(this.int * selected_magic.pow * rand_pow),
                 elemNum: selected_magic.elemNum
               }
@@ -231,6 +251,13 @@ export class Actor {
               if (this.hp > this.maxHp) this.hp = this.maxHp;
               document.getElementById(`actor${this.num}_hp`).textContent = this.hp;
               return false;
+            case 'effect':
+              return {
+                type: 'magic_effect',
+                int: this.int,
+                cond: selected_magic.cond,
+                elemNum: this.elemNum
+              }
             default:
           }
         }
@@ -245,7 +272,7 @@ export class Actor {
     }
   }
 
-  async defend(atk, index) {
+  async defend(atk) {
     const rand_def = (Math.round(Math.random() * 20) + 90) / 100;
     const multiplier = elems_relations[atk.elemNum][this.elemNum];
     let damage;
@@ -282,7 +309,7 @@ export class Actor {
         }
 
         break;
-      case 'magic':
+      case 'magic_attack':
         switch (multiplier) {
           case 1:
             damage = Math.ceil(atk.pow / 2 - this.res * rand_def);
@@ -304,13 +331,97 @@ export class Actor {
         document.getElementsByClassName('actor_container')[this.num].classList.remove('-damaged');
         this.hp -= damage;
         break;
+      case 'magic_effect':
+        if (this.cond !== 'fine') {
+          await output(`${this.name} は すでに じょうたいいじょう だ！`);
+          break;
+        }
+
+        let resistance = this.res - atk.int;
+        const rand_res = Math.round(Math.random() * 100);
+
+        if (rand_res > resistance) {
+          this.cond = atk.cond;
+
+          switch (atk.cond) {
+            case 'sleep':
+              await output(`${this.name} は ねむってしまった！`);
+              document.getElementById(`actor${this.num}_cond`).textContent = '睡眠';
+              break;
+            case 'poison':
+              await output(`${this.name} は どくに おかされた！`);
+              document.getElementById(`actor${this.num}_cond`).textContent = '毒';
+              break;
+            case 'confuse':
+              await output(`${this.name} は こんらんした！`);
+              document.getElementById(`actor${this.num}_cond`).textContent = '混乱';
+              break;
+            default:
+          }
+        } else {
+          await output(`${this.name} には きかなかった！`);
+        }
+        break;
+      default:
     }
 
-    if (this.hp < 0) {
-      this.hp = 0;
+    await this.downCheck(this.hp);
+  }
+
+  async condCheck(cond) {
+    const rand_recov = Math.round(Math.random() * 100);
+
+    switch (cond) {
+      case 'sleep':
+        if (rand_recov < this.condAccum) {
+          await output(`${this.name} は めを さました！`);
+          document.getElementById(`actor${this.num}_cond`).textContent = '健康';
+          this.cond = 'fine';
+          this.condAccum = 0;
+        } else {
+          await output(`${this.name} は ねむっている！`, 'sleeping');
+          this.condAccum += 15;
+        }
+        break;
+      case 'poison':
+        if (rand_recov < this.condAccum) {
+          await output(`${this.name} の どくが なおった！`);
+          document.getElementById(`actor${this.num}_cond`).textContent = '健康';
+          this.cond = 'fine';
+          this.condAccum = 0;
+        } else {
+          const damage = Math.round(Math.random () * 15) + 5
+          await output(`${this.name} は どくで ${damage} の ダメージをうけた！`, 'poisoning');
+          this.hp -= damage;
+          await this.downCheck(this.hp);
+          this.condAccum += 10;
+        }
+        break;
+      case 'confuse':
+        if (rand_recov < this.condAccum) {
+          await output(`${this.name} は しょうきを とりもどした！`);
+          document.getElementById(`actor${this.num}_cond`).textContent = '健康';
+          this.cond = 'fine';
+          this.condAccum = 0;
+        } else {
+          await output(`${this.name} は こんらんしている！`, 'confusing');
+          this.condAccum += 20;
+        }
+        break;
+      default:
+    }
+    await output('', false, 0);
+  }
+
+  async downCheck(hp) {
+    if (hp <= 0) {
+      hp = 0;
+      this.cond = 'down';
       await output(`\n${this.name} は ちからつきた！`, 'down');
+      document.getElementById(`actor${this.num}_cond`).textContent = '戦闘不能';
+      document.getElementsByClassName('actor_container')[this.num].classList.add('-down');
     }
 
-    document.getElementById(`actor${index}_hp`).textContent = this.hp;
+    document.getElementById(`actor${this.num}_hp`).textContent = hp;
   }
 }
