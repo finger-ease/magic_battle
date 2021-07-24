@@ -390,7 +390,7 @@ export class Actor {
           this.cond = 'fine';
           this.condAccum = 0;
         } else {
-          const damage = Math.round(Math.random () * 15) + 5
+          const damage = Math.round(Math.random () * 15) + 5;
           await output(`${this.name} は どくで ${damage} の ダメージをうけた！`, 'poisoning');
           this.hp -= damage;
           await this.downCheck(this.hp);
