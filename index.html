@@ -5,29 +5,29 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Battle</title>
-  <link rel="stylesheet" href="https://finger-ease.github.io/magic_battle/common/css/stylesheet.css">
+  <link rel="stylesheet" href="./common/css/stylesheet.css">
 </head>
 <body>
   <header>
     <h1 class="">Magic Battle</h1>
+    <div id="entryWrapper">
+      <button type="button" id="plusButton">+</button>
+      <button type="button" id="minusButton">-</button>
+      <input type="number" id="actorNum" value="0" readonly>
+    </div>
+    <div class="button_container">
+      <button type="button" id="setButton">Set</button>
+      <button type="reset" id="resetButton">Reset</button>
+      <button type="button" id="startButton">Battle Start</button>
+    </div>
   </header>
-  <main class="content_wrapper">
-    <div>
-      <div id="entryWrapper">
-        <span>対戦人数</span>
-        <input type="number" id="entryNum">
-        <button type="button" id="confirmButton">Confirm</button>
-      </div>
+  <main>
+    <div class="content_wrapper">
       <div id="actorWrapper"></div>
       <textarea id="battleHistory" rows="10" readonly></textarea>
-      <div class="button_container">
-        <button type="button" id="setButton">Set</button>
-        <button type="button" id="startButton">Battle Start</button>
-        <button type="reset" id="resetButton">Reset</button>
-      </div>
     </div>
   </main>
   <footer></footer>
-  <script src="https://finger-ease.github.io/magic_battle/common/js/script.js" type="module"></script>
+  <script src="./common/js/script.js" type="module"></script>
 </body>
 </html>

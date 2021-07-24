@@ -25,7 +25,7 @@ const actorHTML = (num) => {
   `;
   return `
     <div class="actor_container">
-      <input type="text" id="actor${num}" value="${num}">
+      <input type="text" id="actor${num}" class="actor_name" value="${num}">
       <ul class="status_list">
         ${status_list}
       </ul>
@@ -47,39 +47,56 @@ const clear_status = index => {
 
 window.onload = function () {
   const $entryWrapper = document.getElementById('entryWrapper');
-  const $confirmButton = document.getElementById('confirmButton');
+  const $plusButton = document.getElementById('plusButton');
+  const $minusButton = document.getElementById('minusButton');
   const $setButton = document.getElementById('setButton');
   const $startButton = document.getElementById('startButton');
   const $resetButton = document.getElementById('resetButton');
+  const $battleHistory = document.getElementById('battleHistory');
+  let actor_num = 0;
   let sorted_actors = [];
 
-  $confirmButton.addEventListener('click', () => {
-    const actor_num = document.getElementById('entryNum').value;
-    if (actor_num >= 2) {
-      for (let i = 0; i < actor_num; i++) document.getElementById('actorWrapper').innerHTML += actorHTML(i);
-      $entryWrapper.style.display = 'none'
+  $plusButton.addEventListener('click', () => {
+    document.getElementById('actorWrapper').innerHTML += actorHTML(actor_num++);
+    document.getElementById('actorNum').value++;
+    if (actor_num >= 2) $setButton.style.display = 'block';
+  });
+
+  $minusButton.addEventListener('click', () => {
+    if (actor_num > 0) {
+      document.getElementsByClassName('actor_container')[--actor_num].remove();
+      document.getElementById('actorNum').value--;
+      if (actor_num <= 1) $setButton.style.display = 'none';
     }
   });
 
   $setButton.addEventListener('click', async () => {
-    Actor.resetNum();
-    const actor_num = document.getElementById('entryNum').value;
+    const actor_names = [];
 
-    for (let i = 0; i < actor_num; i++) {
-      const actor_name = document.getElementById(`actor${i}`).value;
-      actors.push(await Actor.init(actor_name)); //アクターを生成して配列にプッシュ
+    Array.from(document.getElementsByClassName('actor_name')).forEach(actor_name => actor_name.readOnly = true);
+
+    for (let i = 0; i < actor_num; i++) actor_names.push(document.getElementById(`actor${i}`).value.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"));
+
+    const s = new Set(actor_names);
+
+    if (s.size === actor_names.length) {
+      Actor.resetNum();
+      $entryWrapper.style.display = 'none';
+
+      for (let i = 0; i < actor_names.length; i++) actors.push(await Actor.init(actor_names[i])); //アクターを生成して配列にプッシュ
+
+      actors.forEach((actor, index) => set_status(actor, index));
+
+      sorted_actors = actors.slice();
+      sorted_actors.sort((a, b) => b.agi - a.agi); //素早さ順に並び替え
+
+      $setButton.style.display = 'none';
+      $startButton.style.display = 'block';
+      $resetButton.style.display = 'block';
+      $battleHistory.textContent = '';
+    } else {
+      $battleHistory.textContent = '同名のキャラクターがいます';
     }
-
-    actors.forEach((actor, index) => {
-      set_status(actor, index);
-    });
-
-    sorted_actors = actors.slice();
-    sorted_actors.sort((a, b) => b.agi - a.agi); //素早さ順に並び替え
-
-    $setButton.style.display = 'none';
-    $startButton.style.display = 'block';
-    $resetButton.style.display = 'block';
   });
 
   $startButton.addEventListener('click', async () => {
@@ -87,14 +104,16 @@ window.onload = function () {
     let elapsed_turn = 0;
     $startButton.style.display = 'none';
     $resetButton.style.pointerEvents = 'none';
+    $battleHistory.style.display = 'block';
 
     while (remain_actors.length !== 1 && elapsed_turn <= 50) {
       for (let i = 0; i < sorted_actors.length; i++) {
         if (sorted_actors[i].down) continue;
+        document.getElementsByClassName('actor_container')[sorted_actors[i].num].classList.add('-active');
         const atk = await sorted_actors[i].action();
 
         if (atk) {
-          const arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && !sorted_actor.down);
+          const arr = sorted_actors.filter(sorted_actor => sorted_actor !== sorted_actors[i] && !sorted_actor.down); //攻撃対象の配列を作成
           const targeted = arr[Math.floor(Math.random() * arr.length)];
           let targeted_index;
 
@@ -103,6 +122,7 @@ window.onload = function () {
 
           if (targeted.hp === 0) targeted.down = true;
         }
+        document.getElementsByClassName('actor_container')[sorted_actors[i].num].classList.remove('-active');
         await output('', false, 0);
       }
       elapsed_turn += 1;
@@ -112,21 +132,26 @@ window.onload = function () {
     remain_actors = sorted_actors.filter((sorted_actor) => !sorted_actor.down);
 
     if (remain_actors.length === 1) {
+      document.getElementsByClassName('actor_container')[remain_actors[0].num].classList.add('-active');
       await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
     } else {
-      await output(`ひきわけ`);
+      await output(`50ターンけいか ひきわけ`);
     }
 
     $resetButton.style.pointerEvents = 'auto';
   });
 
   $resetButton.addEventListener('click', () => {
+    Array.from(document.getElementsByClassName('actor_container')).forEach(actor_container => actor_container.classList.remove('-active'));
+    Array.from(document.getElementsByClassName('actor_name')).forEach(actor_name => actor_name.readOnly = false);
     for (let i = 0; i < actors.length; i++) clear_status(i);
     actors = [];
 
-    document.getElementById('battleHistory').textContent = '';
+    $battleHistory.textContent = '';
+    $battleHistory.style.display = 'none';
     $startButton.style.display = 'none';
     $resetButton.style.display = 'none';
+    $entryWrapper.style.display = 'flex';
     $setButton.style.display = 'block';
   });
 };
