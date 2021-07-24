@@ -13,6 +13,11 @@ header {
   border-bottom: 1px solid #999;
 }
 
+main {
+  min-height: calc(100vh - 65px);
+  background-color: #222;
+}
+
 button {
   padding: 4px;
 }
@@ -38,6 +43,13 @@ button {
   margin-left: 12px;
 }
 
+#actorNum::-webkit-inner-spin-button,
+#actorNum::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  -moz-appearance:textfield;
+}
+
 .button_container {
   display: flex;
   align-items: center;
@@ -54,11 +66,6 @@ button {
 
 #startButton {
   margin-left: 12px;
-}
-
-main {
-  min-height: calc(100vh - 65px);
-  background-color: #222;
 }
 
 .content_wrapper {
