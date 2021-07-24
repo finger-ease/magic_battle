@@ -154,6 +154,7 @@ export class Actor {
 
     actor.job = job[jobNum];
     statuses.forEach((status, index) => actor[status] = Math.ceil((parseInt(name_hash.slice(index * 4, index * 4 + 3), 16) % 100 + 1) * actor.job.magnifications[index]));
+    actor.maxHp = actor.hp;
     actor.elemNum = actor.elem % elems.length
     actor.elem = elems[actor.elemNum];
     actor.down = false;
@@ -223,6 +224,7 @@ export class Actor {
               const amount = Math.round(this.int * this.magic.pow * rand_pow);
               await output(`${this.name} は ${amount} かいふくした！`);
               this.hp += amount;
+              if (this.hp > this.maxHp) this.hp = this.maxHp;
               document.getElementById(`actor${this.num}_hp`).textContent = this.hp;
               return false;
             default:
@@ -290,7 +292,7 @@ export class Actor {
           default:
         }
 
-        await output(`${this.name} は ${damage_2} の ダメージをうけた！`, 'damage');
+        await output(`${this.name} は ${damage_2} の ダメージをうけた！`);
         this.hp -= damage_2;
         break;
     }

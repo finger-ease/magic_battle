@@ -8,6 +8,7 @@ ul {
 }
 
 header {
+  display: flex;
   padding: 8px 20px;
   border-bottom: 1px solid #999;
 }
@@ -16,14 +17,54 @@ button {
   padding: 4px;
 }
 
+#entryWrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+#entryWrapper button {
+  width: 24px;
+  padding: 0;
+  font-size: 18px;
+}
+
+#minusButton {
+  margin-left: 4px;
+}
+
+#actorNum {
+  width: 16px;
+  margin-left: 12px;
+}
+
+.button_container {
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+#setButton {
+  display: none;
+}
+
+#startButton, #resetButton {
+  display: none;
+}
+
+#startButton {
+  margin-left: 12px;
+}
+
+main {
+  min-height: calc(100vh - 65px);
+  background-color: #222;
+}
+
 .content_wrapper {
   max-width: 920px;
   margin: 0 auto;
-}
-
-#entryWrapper {
-  display: flex;
-  margin-top: 24px;
+  padding-bottom: 48px;
 }
 
 #actorWrapper {
@@ -33,16 +74,37 @@ button {
 }
 
 .actor_container {
-  width: calc(100% / 4);
-  margin-top: 20px;
+  position: relative;
+  width: calc((100% - 60px) / 4);
+  margin: 40px 0 0 20px;
+  padding: 30px 20px 20px;
+  border: 1px solid #FFF;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #001F43;
 }
 
-.status_list {
-  margin-top: 16px;
+.actor_container.-active {
+  border: 2px solid #FF0000;
+}
+
+.actor_container:nth-of-type(4n + 1) {
+  margin-left: 0;
+}
+
+.actor_name {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 80%;
+  height: 24px;
+  font-size: 18px;
+  transform: translateY(-50%);
 }
 
 .status_item {
   display: flex;
+  color: #FFF;
 }
 
 .status_item + .status_item {
@@ -50,24 +112,36 @@ button {
 }
 
 .status_title {
-  width: 50px;
-  color: #bf0000;
+  width: 48px;
+  margin-right: 12px;
 }
 
 #battleHistory {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.button_container {
-  display: flex;
-  justify-content: center;
-}
-
-#startButton, #resetButton {
   display: none;
+  width: 100%;
+  margin-top: 30px;
 }
 
-#resetButton {
-  margin-left: 12px;
+@media screen and (max-width: 768px) {
+  .content_wrapper {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  #actorWrapper {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+  }
+
+  .actor_container {
+    min-width: 215px;
+  }
+
+  .actor_container:nth-of-type(4n + 1) {
+    margin-left: 20px;
+  }
+
+  .actor_container:first-of-type {
+    margin-left: 0;
+  }
 }
