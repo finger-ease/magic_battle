@@ -149,8 +149,8 @@ export class Actor {
     const actor = new Actor();
     actor.name = actor_name;
     const name_hash = await hash(actor_name);
-    const magicNum = (parseInt(name_hash.slice((statuses.length + 1) * 4, (statuses.length + 1) * 4 + 3), 16) % 100) % magic.length;
-    const jobNum = (parseInt(name_hash.slice((statuses.length + 2) * 4, (statuses.length + 2) * 4 + 3), 16) % 100) % job.length;
+    const magicNums = [(parseInt(name_hash.slice((statuses.length + 1) * 4, (statuses.length + 1) * 4 + 3), 16) % 100) % magic.length, (parseInt(name_hash.slice((statuses.length + 2) * 4, (statuses.length + 2) * 4 + 3), 16) % 100) % magic.length];
+    const jobNum = (parseInt(name_hash.slice((statuses.length + 3) * 4, (statuses.length + 3) * 4 + 3), 16) % 100) % job.length;
 
     actor.job = job[jobNum];
     statuses.forEach((status, index) => actor[status] = Math.ceil((parseInt(name_hash.slice(index * 4, index * 4 + 3), 16) % 100 + 1) * actor.job.magnifications[index]));
@@ -158,7 +158,9 @@ export class Actor {
     actor.elemNum = actor.elem % elems.length
     actor.elem = elems[actor.elemNum];
     actor.down = false;
-    actor.magic = magic[magicNum];
+    actor.magic = [];
+    magicNums.forEach(magicNum => actor.magic.push(magic[magicNum]));
+    actor.magic = [...new Set(actor.magic)]; //重複する魔法を削除
     actor.num = actorCount++;
     return actor;
   }
@@ -205,23 +207,25 @@ export class Actor {
           };
         }
       case 'magic':
-        if (this.mp < this.magic.cost) {
-        await output(`${this.name} は ${this.magic.name} の えいしょう に しっぱいした！`, 'fail');
+        const selected_magic = this.magic[Math.floor(Math.random() * this.magic.length)];
+
+        if (this.mp < selected_magic.cost) {
+        await output(`${this.name} は ${selected_magic.name} の えいしょう に しっぱいした！`, 'fail');
         return false;
         } else {
-          await output(`${this.name} は ${this.magic.name} を となえた！`, this.magic.name);
-          this.mp -= this.magic.cost;
+          await output(`${this.name} は ${selected_magic.name} を となえた！`, selected_magic.name);
+          this.mp -= selected_magic.cost;
           document.getElementById(`actor${this.num}_mp`).textContent = this.mp;
 
-          switch (this.magic.type) {
+          switch (selected_magic.type) {
             case 'attack':
               return {
                 type: 'magic',
-                pow: Math.round(this.int * this.magic.pow * rand_pow),
-                elemNum: this.magic.elemNum
+                pow: Math.round(this.int * selected_magic.pow * rand_pow),
+                elemNum: selected_magic.elemNum
               }
             case 'recovery':
-              const amount = Math.round(this.int * this.magic.pow * rand_pow);
+              const amount = Math.round(this.int * selected_magic.pow * rand_pow);
               await output(`${this.name} は ${amount} かいふくした！`);
               this.hp += amount;
               if (this.hp > this.maxHp) this.hp = this.maxHp;
@@ -244,31 +248,34 @@ export class Actor {
   async defend(atk, index) {
     const rand_def = (Math.round(Math.random() * 20) + 90) / 100;
     const multiplier = elems_relations[atk.elemNum][this.elemNum];
+    let damage;
 
     switch (atk.type) {
       case 'physical':
-        let damage = Math.ceil(atk.pow - this.def * rand_def);
         let avoidance = this.agi - atk.hit;
         const rand_hit = Math.round(Math.random() * 100);
 
-        if (damage <= 0) damage = 1;
         if (avoidance < 5) avoidance = 5;
         if (rand_hit > avoidance) {
           switch (multiplier) {
             case 1:
-              damage = Math.ceil(damage / 2);
+              damage = Math.ceil(atk.pow / 2 - this.def * rand_def);
               await output('こうか は いまひとつだ！', 'half');
               break;
             case 2:
+              damage = Math.ceil(atk.pow - this.def * rand_def);
               break;
             case 4:
-              damage *= 2;
+              damage = Math.ceil(atk.pow * 2 - this.def * rand_def);
               await output('こうか は ばつぐんだ！', 'double');
               break;
             default:
           }
 
+          if (damage <= 0) damage = 1;
+          document.getElementsByClassName('actor_container')[this.num].classList.add('-damaged');
           await output(`${this.name} は ${damage} の ダメージをうけた！`);
+          document.getElementsByClassName('actor_container')[this.num].classList.remove('-damaged');
           this.hp -= damage;
         } else {
           await output(`${this.name} は こうげき を かわした！`, 'avoid');
@@ -276,24 +283,26 @@ export class Actor {
 
         break;
       case 'magic':
-        let damage_2 = Math.ceil(atk.pow - this.res * rand_def);
-        if (damage_2 <= 0) damage_2 = 0;
         switch (multiplier) {
           case 1:
-            damage_2 = Math.ceil(damage_2 / 2);
+            damage = Math.ceil(atk.pow / 2 - this.res * rand_def);
             await output('こうか は いまひとつだ！', 'half');
             break;
           case 2:
+            damage = Math.ceil(atk.pow - this.res * rand_def);
             break;
           case 4:
-            damage_2 *= 2;
+            damage = Math.ceil(atk.pow * 2 - this.res * rand_def);;
             await output('こうか は ばつぐんだ！', 'double');
             break;
           default:
         }
 
-        await output(`${this.name} は ${damage_2} の ダメージをうけた！`);
-        this.hp -= damage_2;
+        if (damage <= 0) damage = 0;
+        document.getElementsByClassName('actor_container')[this.num].classList.add('-damaged');
+        await output(`${this.name} は ${damage} の ダメージをうけた！`);
+        document.getElementsByClassName('actor_container')[this.num].classList.remove('-damaged');
+        this.hp -= damage;
         break;
     }
 

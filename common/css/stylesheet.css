@@ -20,6 +20,7 @@ main {
 
 button {
   padding: 4px;
+  cursor: pointer;
 }
 
 #entryWrapper {
@@ -95,6 +96,20 @@ button {
   border: 2px solid #FF0000;
 }
 
+.actor_container.-damaged {
+  animation: damaged .15s ease-in-out 2 alternate;
+}
+
+@keyframes damaged {
+  50% {
+    opacity: 0;
+  }
+}
+
+.actor_container.-down {
+  opacity: .5;
+}
+
 .actor_container:nth-of-type(4n + 1) {
   margin-left: 0;
 }
@@ -114,13 +129,17 @@ button {
   color: #FFF;
 }
 
+.status_title {
+  color: #FF4500;
+}
+
 .status_item + .status_item {
   margin-top: 8px;
 }
 
 .status_title {
   width: 48px;
-  margin-right: 12px;
+  margin-right: 10px;
 }
 
 #battleHistory {

@@ -15,12 +15,16 @@ const actorHTML = (num) => {
   });
   status_list += `
     <li class="status_item">
-      <p class="status_title">魔法</p>
-      <span id="actor${num}_mag"></span>
-    </li>
-    <li class="status_item">
       <p class="status_title">職業</p>
       <span id="actor${num}_job"></span>
+    </li>
+    <li class="status_item">
+      <p class="status_title">魔法1</p>
+      <span id="actor${num}_mag1"></span>
+    </li>
+    <li class="status_item">
+      <p class="status_title">魔法2</p>
+      <span id="actor${num}_mag2"></span>
     </li>
   `;
   return `
@@ -33,16 +37,17 @@ const actorHTML = (num) => {
   `;
 };
 
-const set_status = (actor, index) => {
-  statuses.forEach(status => document.getElementById(`actor${index}_${status}`).textContent = actor[status]);
-  document.getElementById(`actor${index}_mag`).textContent = actor.magic.name;
-  document.getElementById(`actor${index}_job`).textContent = actor.job.name;
+const set_status = (actor, i) => {
+  statuses.forEach(status => document.getElementById(`actor${i}_${status}`).textContent = actor[status]);
+  actor.magic.forEach((magic, j) => document.getElementById(`actor${i}_mag${j + 1}`).textContent = magic.name);
+  document.getElementById(`actor${i}_job`).textContent = actor.job.name;
 }
 
-const clear_status = index => {
-  statuses.forEach(status => document.getElementById(`actor${index}_${status}`).textContent = '');
-  document.getElementById(`actor${index}_mag`).textContent = '';
-  document.getElementById(`actor${index}_job`).textContent = '';
+const clear_status = i => {
+  statuses.forEach(status => document.getElementById(`actor${i}_${status}`).textContent = '');
+  document.getElementById(`actor${i}_mag1`).textContent = '';
+  document.getElementById(`actor${i}_mag2`).textContent = '';
+  document.getElementById(`actor${i}_job`).textContent = '';
 }
 
 window.onload = function () {
@@ -52,6 +57,7 @@ window.onload = function () {
   const $setButton = document.getElementById('setButton');
   const $startButton = document.getElementById('startButton');
   const $resetButton = document.getElementById('resetButton');
+  const $actorContainers = document.getElementsByClassName('actor_container');
   const $battleHistory = document.getElementById('battleHistory');
   let actor_num = 0;
   let sorted_actors = [];
@@ -64,7 +70,7 @@ window.onload = function () {
 
   $minusButton.addEventListener('click', () => {
     if (actor_num > 0) {
-      document.getElementsByClassName('actor_container')[--actor_num].remove();
+      $actorContainers[--actor_num].remove();
       document.getElementById('actorNum').value--;
       if (actor_num <= 1) $setButton.style.display = 'none';
     }
@@ -73,13 +79,12 @@ window.onload = function () {
   $setButton.addEventListener('click', async () => {
     const actor_names = [];
 
-    Array.from(document.getElementsByClassName('actor_name')).forEach(actor_name => actor_name.readOnly = true);
-
     for (let i = 0; i < actor_num; i++) actor_names.push(document.getElementById(`actor${i}`).value.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"));
 
     const s = new Set(actor_names);
 
     if (s.size === actor_names.length) {
+      [...document.getElementsByClassName('actor_name')].forEach(actor_name => actor_name.readOnly = true);
       Actor.resetNum();
       $entryWrapper.style.display = 'none';
 
@@ -93,9 +98,6 @@ window.onload = function () {
       $setButton.style.display = 'none';
       $startButton.style.display = 'block';
       $resetButton.style.display = 'block';
-      $battleHistory.textContent = '';
-    } else {
-      $battleHistory.textContent = '同名のキャラクターがいます';
     }
   });
 
@@ -109,7 +111,7 @@ window.onload = function () {
     while (remain_actors.length !== 1 && elapsed_turn <= 50) {
       for (let i = 0; i < sorted_actors.length; i++) {
         if (sorted_actors[i].down) continue;
-        document.getElementsByClassName('actor_container')[sorted_actors[i].num].classList.add('-active');
+        $actorContainers[sorted_actors[i].num].classList.add('-active');
         const atk = await sorted_actors[i].action();
 
         if (atk) {
@@ -120,9 +122,12 @@ window.onload = function () {
           actors.forEach((actor, index) => { if (actor.name === targeted.name) targeted_index = index });
           await targeted.defend(atk, targeted_index);
 
-          if (targeted.hp === 0) targeted.down = true;
+          if (targeted.hp === 0) {
+            targeted.down = true;
+            $actorContainers[targeted.num].classList.add('-down');
+          }
         }
-        document.getElementsByClassName('actor_container')[sorted_actors[i].num].classList.remove('-active');
+        $actorContainers[sorted_actors[i].num].classList.remove('-active');
         await output('', false, 0);
       }
       elapsed_turn += 1;
@@ -132,7 +137,7 @@ window.onload = function () {
     remain_actors = sorted_actors.filter((sorted_actor) => !sorted_actor.down);
 
     if (remain_actors.length === 1) {
-      document.getElementsByClassName('actor_container')[remain_actors[0].num].classList.add('-active');
+      $actorContainers[remain_actors[0].num].classList.add('-active');
       await output(`\n${remain_actors[0].name} の しょうり！`, 'finish');
     } else {
       await output(`50ターンけいか ひきわけ`);
@@ -142,8 +147,8 @@ window.onload = function () {
   });
 
   $resetButton.addEventListener('click', () => {
-    Array.from(document.getElementsByClassName('actor_container')).forEach(actor_container => actor_container.classList.remove('-active'));
-    Array.from(document.getElementsByClassName('actor_name')).forEach(actor_name => actor_name.readOnly = false);
+    [...$actorContainers].forEach(actor_container => actor_container.classList.remove('-active', '-down'));
+    [...document.getElementsByClassName('actor_name')].forEach(actor_name => actor_name.readOnly = false);
     for (let i = 0; i < actors.length; i++) clear_status(i);
     actors = [];
 
