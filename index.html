@@ -10,15 +10,15 @@
 <body>
   <header>
     <h1 class="">Magic Battle</h1>
-    <div id="entryWrapper">
-      <button type="button" id="plusButton" accesskey=";">+</button>
-      <button type="button" id="minusButton" accesskey="-">-</button>
-      <input type="number" id="actorNum" value="0" readonly>
-    </div>
     <div class="button_container">
-      <button type="button" id="setButton" accesskey="s">Set</button>
-      <button type="reset" id="resetButton" accesskey="r">Reset</button>
-      <button type="button" id="startButton" accesskey="b">Battle Start</button>
+      <label><input type="checkbox" id="omitMode">Omit Mode</label>
+      <label><input type="checkbox" id="randomMode">Random Mode</label>
+      <button type="button" id="increaseButton">+</button>
+      <button type="button" id="decreaseButton">-</button>
+      <input type="number" id="actorNum" value="0" readonly>
+      <button type="button" id="setButton" disabled>Set</button>
+      <button type="button" id="battleButton" disabled>Battle</button>
+      <button type="reset" id="resetButton" disabled>Reset</button>
     </div>
   </header>
   <main>

@@ -9,6 +9,7 @@ ul {
 
 header {
   display: flex;
+  justify-content: space-between;
   max-width: 920px;
   margin: 0 auto;
   padding: 8px 0;
@@ -22,28 +23,15 @@ main {
 
 button {
   padding: 4px;
-  cursor: pointer;
+  letter-spacing: 1px;
 }
 
-#entryWrapper {
-  display: flex;
-  align-items: center;
-  margin-left: 24px;
-}
-
-#entryWrapper button {
-  width: 24px;
-  padding: 0;
-  font-size: 18px;
-}
-
-#minusButton {
-  margin-left: 4px;
+button:first-letter {
+  font-weight: bold;
 }
 
 #actorNum {
   width: 16px;
-  margin-left: 12px;
 }
 
 #actorNum::-webkit-inner-spin-button,
@@ -56,19 +44,19 @@ button {
 .button_container {
   display: flex;
   align-items: center;
-  margin-left: 24px;
 }
 
-#setButton {
-  display: none;
+.button_container * + * {
+  margin-left: 8px;
 }
 
-#startButton, #resetButton {
-  display: none;
+#omitMode, #randomMode {
+  margin-right: 4px;
 }
 
-#startButton {
-  margin-left: 12px;
+#increaseButton, #decreaseButton {
+  width: 24px;
+  font-size: 16px;
 }
 
 .content_wrapper {
@@ -145,7 +133,7 @@ button {
 }
 
 #battleHistory {
-  display: none;
+  visibility: hidden;
   width: 100%;
   margin-top: 30px;
 }
