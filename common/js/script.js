@@ -138,9 +138,11 @@ const set = async () => {
     const s = new Set(actorNames);
 
     if (s.size === actorNames.length) {
+      $randomMode.disabled = true;
       $increaseButton.disable();
       $decreaseButton.disable();
       $setButton.disable();
+
       [...document.getElementsByClassName('actor_name')].forEach(actor_name => actor_name.readOnly = true);
       Actor.resetNum();
 
@@ -231,6 +233,7 @@ const reset = () => {
     for (let i = 0; i < actors.length; i++) clearStatus(i);
     actors = [];
 
+    $randomMode.disabled = false;
     $increaseButton.enable();
     $decreaseButton.enable();
     $setButton.enable();
