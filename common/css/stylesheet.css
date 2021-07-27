@@ -50,6 +50,10 @@ button:first-letter {
   margin-left: 8px;
 }
 
+#omitMode, #randomMode {
+  margin-right: 4px;
+}
+
 #increaseButton, #decreaseButton {
   width: 24px;
   font-size: 16px;

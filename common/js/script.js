@@ -20,6 +20,8 @@ class Button {
   }
 }
 
+const $omitMode = document.getElementById('omitMode');
+const $randomMode = document.getElementById('randomMode');
 const $increaseButton = new Button('increaseButton', true);
 const $decreaseButton = new Button('decreaseButton', true);
 const $setButton = new Button('setButton', false);
@@ -31,7 +33,6 @@ const input = {flag: true};
 let actors = [];
 let actor_num = 0;
 let sorted_actors = [];
-let omit_mode = false;
 
 const actorHTML = (num) => {
   let status_list = '';
@@ -69,14 +70,14 @@ const actorHTML = (num) => {
       </ul>
     </div>
   `;
-};
+}
 
 const setStatus = (actor, i) => {
   data.statuses.forEach(status => document.getElementById(`actor${i}_${status}`).textContent = actor[status]);
   document.getElementById(`actor${i}_job`).textContent = actor.job.name;
   actor.magic.forEach((magic, j) => document.getElementById(`actor${i}_mag${j + 1}`).textContent = magic.name);
   document.getElementById(`actor${i}_cond`).textContent = '健康';
-};
+}
 
 const clearStatus = i => {
   data.statuses.forEach(status => document.getElementById(`actor${i}_${status}`).textContent = '');
@@ -84,7 +85,7 @@ const clearStatus = i => {
   document.getElementById(`actor${i}_mag2`).textContent = '';
   document.getElementById(`actor${i}_job`).textContent = '';
   document.getElementById(`actor${i}_cond`).textContent = '';
-};
+}
 
 const increaseActor = () => {
   if ($increaseButton.flag_1 && $increaseButton.flag_2) {
@@ -108,6 +109,15 @@ const increaseActor = () => {
       $battleButton.flag_2 = true;
       $resetButton.flag_2 = true;
     }));
+
+    if ($omitMode.checked) document.querySelectorAll('.status_item:nth-of-type(n+3):nth-of-type(-n+11)').forEach(status_item => status_item.style.display = 'none');
+    if ($randomMode.checked) {
+      const cs = Array(Math.floor(Math.random() * 10) + 1);
+      const span = 0x3093 - 0x3041 + 1;
+
+      for (let j = 0; j < cs.length; j++) cs[j] = 0x3041 + Math.floor(Math.random() * span);
+      document.getElementById(`actor${actor_num - 1}`).value = String.fromCharCode.apply(String, cs);
+    }
   }
 }
 
@@ -154,8 +164,6 @@ const battle = async () => {
     $battleButton.disable();
     $resetButton.disable();
     $battleHistory.style.visibility = 'visible';
-
-    if (omit_mode) document.querySelectorAll('.status_item:nth-of-type(n+3):nth-of-type(-n+11)').forEach(status_item => status_item.style.display = 'none');
 
     while (remain_actors.length > 1 && elapsed_turn <= 50) {
       for (let i = 0; i < sorted_actors.length; i++) {
@@ -231,6 +239,28 @@ const reset = () => {
 
 
 
+$randomMode.addEventListener('change', () => {
+  [...document.getElementsByClassName('actor_name')].forEach((actor_name, index) => {
+    if ($randomMode.checked) {
+      const cs = Array(Math.floor(Math.random() * 10) + 1);
+      const span = 0x3093 - 0x3041 + 1;
+
+      for (let j = 0; j < cs.length; j++) cs[j] = 0x3041 + Math.floor(Math.random() * span);
+      actor_name.value = String.fromCharCode.apply(String, cs);
+    } else {
+      actor_name.value = index;
+    }
+  });
+});
+
+$omitMode.addEventListener('change', () => {
+  if ($omitMode.checked) {
+    document.querySelectorAll('.status_item:nth-of-type(n+3):nth-of-type(-n+11)').forEach(status_item => status_item.style.display = 'none');
+  } else {
+    document.querySelectorAll('.status_item:nth-of-type(n+3):nth-of-type(-n+11)').forEach(status_item => status_item.style.display = 'flex');
+  }
+});
+
 $increaseButton.elem.addEventListener('click', increaseActor);
 $decreaseButton.elem.addEventListener('click', decreaseActor);
 $setButton.elem.addEventListener('click', set);
@@ -254,15 +284,6 @@ window.addEventListener('keydown', async (e) => {
     case 'r':
       reset();
       break;
-    // case '0':
-    //   const $actor0 = document.getElementById('actor0');
-    //   if (input.flag && $actor0) {
-    //     $actor0.readOnly = true;
-    //     $actor0.focus();
-    //     $actor0.select();
-    //     $actor0.readOnly = false;
-    //   }
-    //   break;
     default:
   }
 });
