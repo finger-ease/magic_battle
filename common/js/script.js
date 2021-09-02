@@ -29,7 +29,7 @@ const $battleButton = new Button('battleButton', false);
 const $resetButton = new Button('resetButton', false);
 const $actorContainers = document.getElementsByClassName('actor_container');
 const $battleHistory = document.getElementById('battleHistory');
-const input = {flag: true};
+const input = { flag: true };
 let actors = [];
 let actor_num = 0;
 let sorted_actors = [];
@@ -89,9 +89,10 @@ const clearStatus = i => {
 
 const increaseActor = () => {
   if ($increaseButton.flag_1 && $increaseButton.flag_2) {
-    document.getElementById('actorWrapper').insertAdjacentHTML('beforeend', actorHTML(actor_num++));
+    document.getElementById('actorWrapper').insertAdjacentHTML('beforeend', actorHTML(actor_num));
+    if (localStorage.getItem(`actor${actor_num}_name`)) document.getElementById(`actor${actor_num}`).value = localStorage.getItem(`actor${actor_num}_name`);
     document.getElementById('actorNum').value++;
-    if (actor_num >= 2) $setButton.enable();
+    if (actor_num >= 1) $setButton.enable();
     [...document.getElementsByClassName('actor_name')].forEach(actor_name => actor_name.addEventListener('focus', () => { //インプットにフォーカス時、キー操作を無効化
       input.flag = false;
       $increaseButton.flag_2 = false;
@@ -110,14 +111,17 @@ const increaseActor = () => {
       $resetButton.flag_2 = true;
     }));
 
+    [...document.getElementsByClassName('actor_name')].forEach((actor_name, index) => actor_name.addEventListener('input', () => { localStorage.setItem(`actor${index}_name`, document.getElementById(`actor${index}`).value) }));
+
     if ($omitMode.checked) document.querySelectorAll('.status_item:nth-of-type(n+3):nth-of-type(-n+11)').forEach(status_item => status_item.style.display = 'none');
     if ($randomMode.checked) {
       const cs = Array(Math.floor(Math.random() * 10) + 1);
       const span = 0x3093 - 0x3041 + 1;
 
       for (let j = 0; j < cs.length; j++) cs[j] = 0x3041 + Math.floor(Math.random() * span);
-      document.getElementById(`actor${actor_num - 1}`).value = String.fromCharCode.apply(String, cs);
+      document.getElementById(`actor${actor_num}`).value = String.fromCharCode.apply(String, cs);
     }
+    actor_num++;
   }
 }
 
@@ -133,7 +137,7 @@ const set = async () => {
   if ($setButton.flag_1 && $setButton.flag_2) {
     const actorNames = [];
 
-    for (let i = 0; i < actor_num; i++) actorNames.push(document.getElementById(`actor${i}`).value.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"));
+    for (let i = 0; i < actor_num; i++) actorNames.push(document.getElementById(`actor${i}`).value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"));
 
     const s = new Set(actorNames);
 
@@ -251,7 +255,7 @@ $randomMode.addEventListener('change', () => {
       for (let j = 0; j < cs.length; j++) cs[j] = 0x3041 + Math.floor(Math.random() * span);
       actor_name.value = String.fromCharCode.apply(String, cs);
     } else {
-      actor_name.value = index;
+      localStorage.getItem(`actor${index}_name`) ? actor_name.value = localStorage.getItem(`actor${index}_name`) : actor_name.value = index;
     }
   });
 });
