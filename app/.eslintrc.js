@@ -24,7 +24,14 @@ module.exports = {
     project: './tsconfig.eslint.json',
     tsconfigRootDir: __dirname,
   },
-  plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'react', 'react-hooks'],
+  plugins: [
+    '@typescript-eslint',
+    'import',
+    'jsx-a11y',
+    'prefer-arrow',
+    'react',
+    'react-hooks',
+  ],
   root: true,
   rules: {
     'import/extensions': [
@@ -35,6 +42,14 @@ module.exports = {
         jsx: 'never',
         ts: 'never',
         tsx: 'never',
+      },
+    ],
+    'prefer-arrow/prefer-arrow-functions': [
+      'error',
+      {
+        disallowPrototype: true,
+        singleReturnOnly: false,
+        classPropertiesAllowed: false,
       },
     ],
     'react/function-component-definition': [
